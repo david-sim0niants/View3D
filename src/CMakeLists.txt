@@ -3,8 +3,11 @@ set(TARGET_NAME view3d)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(glm REQUIRED)
 
-add_executable(${TARGET_NAME} main.cpp)
+add_executable(${TARGET_NAME} main.cpp scene.cpp)
+
+target_include_directories(${TARGET_NAME} PRIVATE ${ROOT_INCLUDE_DIR})
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

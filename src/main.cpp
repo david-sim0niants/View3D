@@ -3,6 +3,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "asset_manager.hpp"
+#include "scene.hpp"
+
 namespace {
 
 void frameBufferSizeCallback(GLFWwindow*, int width, int height)
@@ -39,6 +42,11 @@ int run(const std::string& file_path)
 
     glEnable(GL_DEPTH_TEST);
 
+    view3d::Mesh3D mesh = view3d::loadMesh3D(file_path.c_str());
+
+    view3d::Scene scene;
+    scene.includeObject(view3d::Object(mesh));
+
     while (! glfwWindowShouldClose(window)) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
@@ -46,7 +54,7 @@ int run(const std::string& file_path)
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // rendering goes here
+        scene.render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
