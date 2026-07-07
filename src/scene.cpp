@@ -19,11 +19,4 @@ Object* Scene::addObject(std::unique_ptr<Object>&& object)
     return object_ptr;
 }
 
-void Scene::render()
-{
-    for (const auto& object : objects) {
-        // TODO
-    }
-}
-
 } // namespace view3d

@@ -8,5 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 set(ROOT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+set(SHARED_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/share)
+
 add_subdirectory(third_party)
 add_subdirectory(src)

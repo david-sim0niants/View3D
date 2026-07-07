@@ -5,7 +5,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 
-add_executable(${TARGET_NAME} main.cpp scene.cpp)
+add_executable(${TARGET_NAME} main.cpp scene.cpp shader.cpp asset_manager.cpp)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${ROOT_INCLUDE_DIR})
 
@@ -14,3 +14,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     CLI11::CLI11 glfw OpenGL::GL GLEW::GLEW)
+
+target_compile_definitions(${TARGET_NAME} PRIVATE
+    VIEW3D_SHARED_DATA_DIR="${SHARED_DATA_DIR}")

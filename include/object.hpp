@@ -1,43 +1,52 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "mesh.hpp"
+#include "shader.hpp"
+#include "transform.hpp"
 
 namespace view3d {
 
-using ObjectID = unsigned long long;
-
-class Object {
+class Object : public Transform {
   public:
-    explicit Object(Mesh3D& mesh, glm::mat4 transform = {0.0f})
-        : mesh(mesh), transform(transform)
+    explicit Object(Mesh3D& mesh, Shader shader, glm::vec3 color)
+        : mesh(&mesh), shader(shader), color(color)
     {
     }
 
-    inline Mesh3D& getMesh() noexcept
+    inline Mesh3D* getMesh() const noexcept
     {
         return mesh;
     }
 
-    inline glm::mat4 getTransform() const noexcept
+    inline void setMesh(Mesh3D& new_mesh)
     {
-        return transform;
+        mesh = &new_mesh;
     }
 
-    inline glm::vec3 getPosition() const noexcept
+    inline const Shader& getShader() const noexcept
     {
-        return transform[3];
+        return shader;
     }
 
-    inline void setPosition(const glm::vec3& position) noexcept
+    inline void setShader(const Shader& new_shader)
     {
-        transform[3] = glm::vec4(position, 1.0f);
+        shader = new_shader;
+    }
+
+    inline const glm::vec3& getColor() const noexcept
+    {
+        return color;
+    }
+
+    inline void setColor(const glm::vec3& new_color)
+    {
+        color = new_color;
     }
 
   private:
-    Mesh3D& mesh;
-    glm::mat4 transform;
+    Mesh3D* mesh = nullptr;
+    Shader shader;
+    glm::vec3 color;
 };
 
 } // namespace view3d

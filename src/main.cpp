@@ -4,13 +4,46 @@
 #include <GLFW/glfw3.h>
 
 #include "asset_manager.hpp"
+#include "light.hpp"
+#include "mesh.hpp"
 #include "scene.hpp"
 
 namespace {
 
-void frameBufferSizeCallback(GLFWwindow*, int width, int height)
+using namespace view3d;
+
+class BasicView {
+  public:
+    explicit BasicView(const char* file_path)
+        : mesh(loadMesh3D(file_path)),
+          shader(loadBuiltinShader("basic_vertex.glsl", "basic_fragment.glsl")),
+          scene(), object(scene.createObject(mesh, shader, glm::vec3{1.0})),
+          camera(16.0f / 9.0f), light(glm::vec3(1.0f), 1.0f)
+    {
+        scene.setCamera(&camera);
+        scene.setLight(&light);
+    }
+
+    void resizeFrame(int width, int height)
+    {
+        glViewport(0, 0, width, height);
+        camera.setAspectRatio(static_cast<float>(width) / height);
+    }
+
+  private:
+    Mesh3D mesh;
+    Shader shader;
+    Scene scene;
+    Object* object;
+    Camera camera;
+    Light light;
+};
+
+void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    void* data = glfwGetWindowUserPointer(window);
+    BasicView* basic_view = reinterpret_cast<BasicView*>(data);
+    basic_view->resizeFrame(width, height);
 }
 
 int run(const std::string& file_path)
@@ -40,12 +73,10 @@ int run(const std::string& file_path)
         return -1;
     }
 
+    BasicView basic_view(file_path.c_str());
+    glfwSetWindowUserPointer(window, &basic_view);
+
     glEnable(GL_DEPTH_TEST);
-
-    view3d::Mesh3D mesh = view3d::loadMesh3D(file_path.c_str());
-
-    view3d::Scene scene;
-    scene.includeObject(view3d::Object(mesh));
 
     while (! glfwWindowShouldClose(window)) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -54,7 +85,7 @@ int run(const std::string& file_path)
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        scene.render();
+        // rendering
 
         glfwSwapBuffers(window);
         glfwPollEvents();

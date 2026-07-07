@@ -1,5 +1,7 @@
 #pragma once
 
+#include "camera.hpp"
+#include "light.hpp"
 #include "misc/smart_ptr_hash.hpp"
 #include "object.hpp"
 
@@ -40,12 +42,27 @@ class Scene {
         return objects.find(object) != objects.end();
     }
 
-    void render();
+    inline const auto& getObjects() const noexcept
+    {
+        return objects;
+    }
+
+    void setCamera(Camera* camera)
+    {
+        this->camera = camera;
+    }
+
+    void setLight(Light* light)
+    {
+        this->light = light;
+    }
 
   private:
     Object* addObject(std::unique_ptr<Object>&& object);
 
     misc::SmartPtrSet<std::unique_ptr, Object> objects;
+    Camera* camera;
+    Light* light;
 };
 
 } // namespace view3d
