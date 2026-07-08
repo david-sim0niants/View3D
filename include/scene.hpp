@@ -47,9 +47,19 @@ class Scene {
         return objects;
     }
 
+    Camera* getCamera() const noexcept
+    {
+        return camera;
+    }
+
     void setCamera(Camera* camera)
     {
         this->camera = camera;
+    }
+
+    Light* getLight() const noexcept
+    {
+        return light;
     }
 
     void setLight(Light* light)

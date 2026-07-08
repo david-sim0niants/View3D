@@ -5,7 +5,8 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 
-add_executable(${TARGET_NAME} main.cpp scene.cpp shader.cpp asset_manager.cpp)
+add_executable(${TARGET_NAME} main.cpp
+    scene.cpp shader.cpp asset_manager.cpp renderer.cpp controller.cpp)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${ROOT_INCLUDE_DIR})
 
