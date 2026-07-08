@@ -20,13 +20,14 @@ class BasicView {
         : mesh(loadMesh3D(file_path)),
           shader(loadBuiltinShader("basic_vertex.glsl", "basic_fragment.glsl")),
           object(scene.createObject(mesh, shader, glm::vec3{1.0})),
-          camera(16.0f / 9.0f), light(glm::vec3(1.0f), 1.0f),
+          camera(16.0f / 9.0f), light(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f),
           controller(window, &camera)
     {
         scene.setCamera(&camera);
         scene.setLight(&light);
 
-        camera.translate(glm::vec3(0.0f, 5.0f, 0.0f));
+        camera.translate(glm::vec3(0.0f, 20.0f, 0.0f));
+        light.translate(glm::vec3(20.0f));
 
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
@@ -46,6 +47,8 @@ class BasicView {
     void resizeFrame(int width, int height)
     {
         glViewport(0, 0, width, height);
+        if (glGetError() != GL_NO_ERROR)
+            throw std::runtime_error("glViewport failed");
         camera.setAspectRatio(static_cast<float>(width) / height);
     }
 

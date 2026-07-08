@@ -62,6 +62,13 @@ GLuint getUniformLocation(GLuint program_id, const char* name)
         return location;
 }
 
+void checkGLError(const char* msg)
+{
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR)
+        throw std::runtime_error(std::format("{} GL error: {}", msg, err));
+}
+
 } // namespace
 
 Shader::Shader(const char* vert_src, const char* frag_src)
@@ -72,26 +79,31 @@ Shader::Shader(const char* vert_src, const char* frag_src)
 void Shader::setUniform(const char* name, float value)
 {
     glUniform1f(getUniform(name), value);
+    checkGLError("glUniform1f");
 }
 
 void Shader::setUniform(const char* name, const glm::mat3& value)
 {
     glUniformMatrix3fv(getUniform(name), 1, GL_FALSE, &value[0][0]);
+    checkGLError("glUniformMatrix3fv");
 }
 
 void Shader::setUniform(const char* name, const glm::mat4& value)
 {
     glUniformMatrix4fv(getUniform(name), 1, GL_FALSE, &value[0][0]);
+    checkGLError("glUniformMatrix4fv");
 }
 
 void Shader::setUniform(const char* name, const glm::vec3& value)
 {
     glUniform3fv(getUniform(name), 1, &value[0]);
+    checkGLError("glUniform3fv");
 }
 
 void Shader::setUniform(const char* name, const glm::vec4& value)
 {
     glUniform4fv(getUniform(name), 1, &value[0]);
+    checkGLError("glUniform4fv");
 }
 
 void Shader::use() const
@@ -99,8 +111,7 @@ void Shader::use() const
     static unsigned int curr_id = 0;
     if (curr_id != id) {
         glUseProgram(id);
-        if (glGetError() != GL_NO_ERROR)
-            throw std::runtime_error("glUseProgram failed.");
+        checkGLError("glUseProgram");
         curr_id = id;
     }
 }

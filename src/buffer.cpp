@@ -21,8 +21,13 @@ unsigned int createRawDeviceBuffer(size_t raw_size)
 {
     unsigned int id;
     glGenBuffers(1, &id);
+    checkGLError("glGenBuffers");
+
     glBindBuffer(GL_ARRAY_BUFFER, id);
+    checkGLError("glBindBuffer");
+
     glBufferData(GL_ARRAY_BUFFER, raw_size, nullptr, GL_STATIC_DRAW);
+    checkGLError("glBufferData");
     return id;
 }
 
@@ -38,13 +43,10 @@ void copyToDeviceBuffer(unsigned int id, const void* data, size_t raw_size)
         throw std::invalid_argument("Buffer ID is 0.");
 
     glBindBuffer(GL_ARRAY_BUFFER, id);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, raw_size, data);
+    checkGLError("glBindBuffer");
 
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
-        throw std::runtime_error("glBufferSubData failed with GL error: " +
-                                 std::to_string(err));
-    }
+    glBufferSubData(GL_ARRAY_BUFFER, 0, raw_size, data);
+    checkGLError("glBufferSubData");
 }
 
 void copyFromDeviceBuffer(unsigned int id, void* data, size_t raw_size)
@@ -53,8 +55,9 @@ void copyFromDeviceBuffer(unsigned int id, void* data, size_t raw_size)
         throw std::invalid_argument("Buffer ID is 0.");
 
     glBindBuffer(GL_ARRAY_BUFFER, id);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, raw_size, data);
+    checkGLError("glBindBuffer");
 
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, raw_size, data);
     checkGLError("glGetBufferSubData");
 }
 
@@ -65,10 +68,13 @@ void copyFromDeviceToDeviceBuffer(unsigned int src_id, unsigned int dst_id,
         throw std::invalid_argument("Source or destination buffer ID is 0.");
 
     glBindBuffer(GL_COPY_READ_BUFFER, src_id);
+    checkGLError("glBindBuffer");
+
     glBindBuffer(GL_COPY_WRITE_BUFFER, dst_id);
+    checkGLError("glBindBuffer");
+
     glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0,
                         raw_size);
-
     checkGLError("glCopyBufferSubData");
 }
 

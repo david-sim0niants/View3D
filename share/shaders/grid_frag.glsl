@@ -27,10 +27,15 @@ float computeDepth(vec3 pos)
 void main()
 {
     float t = -near_point.y / (far_point.y - near_point.y);
-    if (t <= 0.0) discard;
+    if (t <= 0.0)
+        discard;
 
     vec3 frag_pos3d = near_point + t * (far_point - near_point);
-    gl_FragDepth = computeDepth(frag_pos3d);
 
-    frag_color = grid(frag_pos3d, 1.0);
+    vec4 color = grid(frag_pos3d, 1.0);
+    if (color.a < 0.01)
+        discard;
+
+    gl_FragDepth = computeDepth(frag_pos3d);
+    frag_color = color;
 }

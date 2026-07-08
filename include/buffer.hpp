@@ -98,6 +98,11 @@ class DeviceBuffer {
         std::swap(size_, other.size_);
     }
 
+    unsigned int getID() const noexcept
+    {
+        return id;
+    }
+
     size_t size() const noexcept
     {
         return size_;

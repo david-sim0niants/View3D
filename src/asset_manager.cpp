@@ -45,14 +45,7 @@ Mesh3D loadMesh3D(const char* file_path)
 
     Mesh3D mesh3d(std::move(vertices), std::move(faces));
     mesh3d.computeNormals();
-
-    DeviceBuffer<Vertex<3>> device_vertices(mesh3d.getVertices().size());
-    device_vertices.upload(mesh3d.getVertices().asHost());
-
-    DeviceBuffer<Face<3>> device_faces(mesh3d.getFaces().size());
-    device_faces.upload(mesh3d.getFaces().asHost());
-
-    return Mesh3D(std::move(device_vertices), std::move(device_faces));
+    return mesh3d;
 }
 
 Shader loadShader(const char* vert_fp, const char* frag_fp)
