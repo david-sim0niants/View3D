@@ -17,6 +17,8 @@ class Renderer {
 
     Shader grid_shader;
     unsigned int dummy_vao;
+
+    std::unordered_map<Object*, Mesh3D> device_meshes;
 };
 
 } // namespace view3d

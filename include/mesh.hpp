@@ -2,81 +2,101 @@
 
 #include <glm/glm.hpp>
 
-#include <algorithm>
+#include "buffer.hpp"
+
+#include <span>
 #include <stdexcept>
-#include <vector>
 
 namespace view3d {
 
+template<int N, typename T = float>
+struct Vertex {
+    glm::vec<N, T> position;
+    glm::vec<N, T> normal;
+};
+
+template<int N>
+    requires(N > 0 && N <= 4)
+struct Face {
+    unsigned int indices[N];
+};
+
 template<typename T, int N>
+void computeNormals(std::span<Vertex<N, T>> vertices, std::span<Face<3>> faces)
+{
+    using Vec = glm::vec<N, T>;
+
+    for (auto& vertex : vertices)
+        vertex.normal = Vec(0.0f);
+
+    for (const auto& face : faces) {
+        assert(face.indices[0] < vertices.size());
+        assert(face.indices[1] < vertices.size());
+        assert(face.indices[2] < vertices.size());
+
+        auto& v0 = vertices[face.indices[0]];
+        auto& v1 = vertices[face.indices[1]];
+        auto& v2 = vertices[face.indices[2]];
+
+        Vec face_normal =
+            glm::cross(v1.position - v0.position, v2.position - v0.position);
+
+        v0.normal += face_normal;
+        v1.normal += face_normal;
+        v2.normal += face_normal;
+    }
+
+    for (auto& vertex : vertices)
+        vertex.normal = glm::normalize(vertex.normal);
+}
+
+template<typename T, int N, int FN = 3>
 class Mesh {
   public:
     using Vec = glm::vec<N, T>;
+    using Vertex = view3d::Vertex<N, T>;
+    using Face = view3d::Face<FN>;
 
     Mesh() = default;
 
-    Mesh(std::vector<Vec>&& vertices, std::vector<unsigned int>&& indices)
-        : vertices(std::move(vertices)), indices(std::move(indices))
+    Mesh(HostBuffer<Vertex>&& vertices, HostBuffer<Face>&& faces)
+        : vertices(std::move(vertices)), faces(std::move(faces))
     {
-        validate();
-        computeNormals();
     }
 
-    const auto& getVertices() const noexcept
+    Mesh(DeviceBuffer<Vertex>&& vertices, DeviceBuffer<Face>&& faces)
+        : vertices(std::move(vertices)), faces(std::move(faces))
     {
-        return vertices;
     }
 
-    const auto& getIndices() const noexcept
+    auto&& getVertices(this auto&& self) noexcept
     {
-        return indices;
+        return self.vertices;
     }
 
-    const auto& getNormals() const noexcept
+    auto&& getFaces(this auto&& self) noexcept
     {
-        return normals;
-    }
-
-  private:
-    void validate()
-    {
-        if (indices.empty())
-            return;
-
-        if (indices.size() % 3 != 0)
-            throw std::invalid_argument(
-                "Indices size must be a multiple of 3 for triangles.");
-
-        if (*std::max_element(indices.begin(), indices.end()) >= vertices.size())
-            throw std::out_of_range(
-                "Index value exceeds the number of vertices.");
+        return self.faces;
     }
 
     void computeNormals()
+        requires(FN == 3)
     {
-        normals.resize(vertices.size(), Vec(0.0f));
+        if (! (vertices.inHost() && faces.inHost()))
+            throw std::runtime_error(
+                "Vertices and faces must be in the host memory.");
 
-        for (size_t i = 0; i < indices.size(); i += 3) {
-            const auto& v0 = vertices[indices[i]];
-            const auto& v1 = vertices[indices[i + 1]];
-            const auto& v2 = vertices[indices[i + 2]];
+        auto& vertices = this->vertices.asHost();
+        auto& faces = this->faces.asHost();
 
-            Vec face_normal = glm::cross(v1 - v0, v2 - v0);
-
-            normals[indices[i]] += face_normal;
-            normals[indices[i + 1]] += face_normal;
-            normals[indices[i + 2]] += face_normal;
-        }
-
-        for (auto& normal : normals)
-            normal = glm::normalize(normal);
+        view3d::computeNormals(std::span(vertices), std::span(faces));
     }
 
-    std::vector<Vec> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Vec> normals;
+  private:
+    Buffer<Vertex> vertices;
+    Buffer<Face> faces;
 };
 
-using Mesh3D = Mesh<float, 3>;
+using Mesh3D = Mesh<float, 3, 3>;
 
 }; // namespace view3d

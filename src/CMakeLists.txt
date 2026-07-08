@@ -7,7 +7,7 @@ find_package(glm REQUIRED)
 find_package(assimp)
 
 add_executable(${TARGET_NAME} main.cpp
-    scene.cpp shader.cpp asset_manager.cpp renderer.cpp controller.cpp)
+    scene.cpp shader.cpp buffer.cpp asset_manager.cpp renderer.cpp controller.cpp)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${ROOT_INCLUDE_DIR})
 

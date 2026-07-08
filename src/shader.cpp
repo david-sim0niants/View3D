@@ -2,11 +2,14 @@
 
 #include <GL/glew.h>
 
+#include <format>
 #include <stdexcept>
 
 namespace view3d {
 
 namespace {
+
+using namespace std::string_literals;
 
 GLuint compileShader(GLenum type, const char* src)
 {
@@ -19,10 +22,7 @@ GLuint compileShader(GLenum type, const char* src)
     if (! success) {
         char info_log[512];
         glGetShaderInfoLog(shader, 512, nullptr, info_log);
-
-        std::string error = "Shader compilation failed: ";
-        error += info_log;
-        throw std::runtime_error(error);
+        throw std::runtime_error("Shader compilation failed: "s + info_log);
     }
 
     return shader;
@@ -43,10 +43,7 @@ unsigned int linkProgram(const char* vert_src, const char* frag_src)
     if (! success) {
         char info_log[512];
         glGetProgramInfoLog(program_id, 512, nullptr, info_log);
-
-        std::string error = "Shader program linking failed: ";
-        error += info_log;
-        throw std::runtime_error(error);
+        throw std::runtime_error("Shader compilation failed: "s + info_log);
     }
 
     glDeleteShader(vertex_shader);
@@ -55,46 +52,63 @@ unsigned int linkProgram(const char* vert_src, const char* frag_src)
     return program_id;
 }
 
+GLuint getUniformLocation(GLuint program_id, const char* name)
+{
+    GLint location = glGetUniformLocation(program_id, name);
+    if (location == -1)
+        throw std::invalid_argument(
+            std::format("Uniform {} not found in shader program.", name));
+    else
+        return location;
+}
+
 } // namespace
 
 Shader::Shader(const char* vert_src, const char* frag_src)
-    : program_id(linkProgram(vert_src, frag_src))
+    : id(linkProgram(vert_src, frag_src))
 {
+}
+
+void Shader::setUniform(const char* name, float value)
+{
+    glUniform1f(getUniform(name), value);
+}
+
+void Shader::setUniform(const char* name, const glm::mat3& value)
+{
+    glUniformMatrix3fv(getUniform(name), 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::setUniform(const char* name, const glm::mat4& value)
+{
+    glUniformMatrix4fv(getUniform(name), 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::setUniform(const char* name, const glm::vec3& value)
+{
+    glUniform3fv(getUniform(name), 1, &value[0]);
+}
+
+void Shader::setUniform(const char* name, const glm::vec4& value)
+{
+    glUniform4fv(getUniform(name), 1, &value[0]);
 }
 
 void Shader::use() const
 {
-    glUseProgram(program_id);
+    static unsigned int curr_id = 0;
+    if (curr_id != id) {
+        glUseProgram(id);
+        if (glGetError() != GL_NO_ERROR)
+            throw std::runtime_error("glUseProgram failed.");
+        curr_id = id;
+    }
 }
 
-void Shader::setUniform(const char* name, float value) const
+unsigned int Shader::getUniform(const char* name) const
 {
-    GLint location = glGetUniformLocation(program_id, name);
-    glUniform1f(location, value);
-}
-
-void Shader::setUniform(const char* name, const glm::mat3& value) const
-{
-    GLint location = glGetUniformLocation(program_id, name);
-    glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
-}
-
-void Shader::setUniform(const char* name, const glm::mat4& value) const
-{
-    GLint location = glGetUniformLocation(program_id, name);
-    glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
-}
-
-void Shader::setUniform(const char* name, const glm::vec3& value) const
-{
-    GLint location = glGetUniformLocation(program_id, name);
-    glUniform3fv(location, 1, &value[0]);
-}
-
-void Shader::setUniform(const char* name, const glm::vec4& value) const
-{
-    GLint location = glGetUniformLocation(program_id, name);
-    glUniform4fv(location, 1, &value[0]);
+    use();
+    return getUniformLocation(id, name);
 }
 
 } // namespace view3d

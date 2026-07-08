@@ -20,17 +20,33 @@ Renderer::~Renderer()
     glDeleteVertexArrays(1, &dummy_vao);
 }
 
+namespace {
+
+void renderObject(const Camera& camera, const Object& object)
+{
+    Shader shader = object.getShader();
+    shader.setUniform("model", object.getMatrix());
+    shader.setUniform("view", camera.getViewMatrix());
+    shader.setUniform("projection", camera.getProjectionMatrix());
+
+    // TODO: to be done soon
+}
+
+} // namespace
+
 void Renderer::render(const Scene& scene)
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     renderGrid(*scene.getCamera());
+
+    for (auto&& obj : scene.getObjects())
+        renderObject(*scene.getCamera(), *obj);
 }
 
 void Renderer::renderGrid(const Camera& camera)
 {
-    grid_shader.use();
     grid_shader.setUniform("view", camera.getViewMatrix());
     grid_shader.setUniform("projection", camera.getProjectionMatrix());
 

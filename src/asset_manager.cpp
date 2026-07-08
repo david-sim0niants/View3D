@@ -23,23 +23,36 @@ Mesh3D loadMesh3D(const char* file_path)
 
     const aiMesh* mesh = scene->mMeshes[0];
 
-    std::vector<glm::vec3> vertices(mesh->mNumVertices);
-    std::transform(
-        &mesh->mVertices[0], &mesh->mVertices[mesh->mNumVertices], &vertices[0],
-        [](const aiVector3D& v) { return glm::vec3(v.x, v.y, v.z); });
+    HostBuffer<Vertex<3>> vertices(mesh->mNumVertices);
 
-    std::vector<unsigned int> indices(mesh->mNumFaces * 3);
-    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-        const aiFace& face = mesh->mFaces[i];
-        if (face.mNumIndices != 3) {
-            throw std::runtime_error("Non-triangular face found in mesh");
-        }
-        indices[i * 3 + 0] = face.mIndices[0];
-        indices[i * 3 + 1] = face.mIndices[1];
-        indices[i * 3 + 2] = face.mIndices[2];
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+        Vertex<3>& vertex = vertices[i];
+        const aiVector3D& ai_vertex = mesh->mVertices[i];
+
+        vertex.position = glm::vec3(ai_vertex.x, ai_vertex.y, ai_vertex.z);
     }
 
-    return Mesh3D(std::move(vertices), std::move(indices));
+    HostBuffer<Face<3>> faces(mesh->mNumFaces);
+
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+        Face<3>& face = faces[i];
+        const aiFace& ai_face = mesh->mFaces[i];
+
+        face.indices[0] = ai_face.mIndices[0];
+        face.indices[1] = ai_face.mIndices[1];
+        face.indices[2] = ai_face.mIndices[2];
+    }
+
+    Mesh3D mesh3d(std::move(vertices), std::move(faces));
+    mesh3d.computeNormals();
+
+    DeviceBuffer<Vertex<3>> device_vertices(mesh3d.getVertices().size());
+    device_vertices.upload(mesh3d.getVertices().asHost());
+
+    DeviceBuffer<Face<3>> device_faces(mesh3d.getFaces().size());
+    device_faces.upload(mesh3d.getFaces().asHost());
+
+    return Mesh3D(std::move(device_vertices), std::move(device_faces));
 }
 
 Shader loadShader(const char* vert_fp, const char* frag_fp)
