@@ -47,7 +47,7 @@ class Mesh {
             throw std::invalid_argument(
                 "Indices size must be a multiple of 3 for triangles.");
 
-        if (std::max_element(indices.begin(), indices.end()) >= vertices.size())
+        if (*std::max_element(indices.begin(), indices.end()) >= vertices.size())
             throw std::out_of_range(
                 "Index value exceeds the number of vertices.");
     }

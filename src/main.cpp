@@ -27,7 +27,6 @@ class BasicView {
         scene.setLight(&light);
 
         camera.translate(glm::vec3(0.0f, 5.0f, 0.0f));
-        // camera.rotate(glm::radians(-15.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
