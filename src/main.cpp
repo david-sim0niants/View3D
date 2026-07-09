@@ -8,67 +8,57 @@
 #include "light.hpp"
 #include "mesh.hpp"
 #include "renderer.hpp"
+#include "resources.hpp"
 #include "scene.hpp"
 
 namespace {
 
 using namespace view3d;
 
-class BasicView {
-  public:
-    explicit BasicView(GLFWwindow* window, const char* file_path)
-        : mesh(loadMesh3D(file_path)),
-          shader(loadBuiltinShader("basic_vertex.glsl", "basic_fragment.glsl")),
-          object(scene.createObject(mesh, shader, glm::vec3{1.0})),
-          camera(16.0f / 9.0f), light(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f),
-          controller(window, &camera)
+struct View {
+    Scene& scene;
+    Renderer& renderer;
+
+    void resetFor(GLFWwindow* window)
     {
-        scene.setCamera(&camera);
-        scene.setLight(&light);
-
-        camera.translate(glm::vec3(0.0f, 20.0f, 0.0f));
-        light.translate(glm::vec3(20.0f));
-
-        glfwSetWindowUserPointer(window, this);
-        glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
-
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        resizeFrame(width, height);
+        int win_width, win_height;
+        glfwGetFramebufferSize(window, &win_width, &win_height);
+        resizeView(win_width, win_height);
     }
 
-    void update()
+    void resizeView(int width, int height)
     {
-        controller.update();
-        renderer.render(scene);
+        scene.getCamera()->setAspectRatio(static_cast<float>(width) / height);
+        renderer.setViewport(width, height);
     }
-
-  private:
-    void resizeFrame(int width, int height)
-    {
-        glViewport(0, 0, width, height);
-        if (glGetError() != GL_NO_ERROR)
-            throw std::runtime_error("glViewport failed");
-        camera.setAspectRatio(static_cast<float>(width) / height);
-    }
-
-    static void frameBufferSizeCallback(GLFWwindow* window, int width,
-                                        int height)
-    {
-        void* data = glfwGetWindowUserPointer(window);
-        BasicView* basic_view = reinterpret_cast<BasicView*>(data);
-        basic_view->resizeFrame(width, height);
-    }
-
-    Mesh3D mesh;
-    Shader shader;
-    Scene scene;
-    Object* object;
-    Camera camera;
-    Light light;
-    Renderer renderer;
-    Controller controller;
 };
+
+Scene prepareScene(const char* file_path)
+{
+    Camera* camera = createResource<Camera>(16.0f / 9.0f);
+    Light* light = createResource<Light>(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    Mesh3D* mesh = createResource<Mesh3D>(loadMesh3D(file_path));
+    Shader shader =
+        loadBuiltinShader("basic_vertex.glsl", "basic_fragment.glsl");
+    Object* object = createResource<Object>(*mesh, shader, glm::vec3{1.0f});
+
+    Scene scene;
+    scene.setCamera(camera);
+    scene.setLight(light);
+    scene.addObject(object);
+
+    camera->translate(glm::vec3(0.0f, 20.0f, 0.0f));
+    light->translate(glm::vec3(20.0f));
+
+    return scene;
+}
+
+void frameBufferSizeCallback(GLFWwindow* window, int width, int height)
+{
+    void* data = glfwGetWindowUserPointer(window);
+    View* view = reinterpret_cast<View*>(data);
+    view->resizeView(width, height);
+}
 
 int run(const std::string& file_path)
 {
@@ -96,13 +86,21 @@ int run(const std::string& file_path)
         return -1;
     }
 
-    BasicView basic_view(window, file_path.c_str());
+    Scene scene = prepareScene(file_path.c_str());
+    Renderer renderer;
+    Controller controller(window, scene.getCamera());
+
+    View view = {scene, renderer};
+    view.resetFor(window);
+    glfwSetWindowUserPointer(window, &view);
+    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
 
     while (! glfwWindowShouldClose(window)) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        basic_view.update();
+        controller.update();
+        renderer.render(scene);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

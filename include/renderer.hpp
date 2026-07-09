@@ -12,6 +12,7 @@ class Renderer {
     ~Renderer();
 
     void render(const Scene& scene);
+    void setViewport(int width, int height);
 
   private:
     void renderGrid(const Camera& camera);

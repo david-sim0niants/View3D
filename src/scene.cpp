@@ -2,21 +2,20 @@
 
 namespace view3d {
 
-bool Scene::destroyObject(Object* object)
+Object* Scene::addObject(Object* object)
 {
-    auto it = objects.find(object);
-    if (it == objects.end())
-        return false;
-
-    objects.erase(it);
-    return true;
+    auto [_, inserted] = objects.insert(object);
+    return inserted ? object : nullptr;
 }
 
-Object* Scene::addObject(std::unique_ptr<Object>&& object)
+Object* Scene::removeObject(Object* object)
 {
-    Object* object_ptr = object.get();
-    objects.emplace(std::move(object));
-    return object_ptr;
+    if (hasObject(object)) {
+        objects.erase(object);
+        return object;
+    } else {
+        return nullptr;
+    }
 }
 
 } // namespace view3d

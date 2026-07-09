@@ -93,8 +93,14 @@ void Renderer::render(const Scene& scene)
 
     renderGrid(*scene.getCamera());
 
-    for (auto&& obj : scene.getObjects())
-        renderObject(scene, obj.get());
+    for (Object* obj : scene.getObjects())
+        renderObject(scene, obj);
+}
+
+void Renderer::setViewport(int width, int height)
+{
+    glViewport(0, 0, width, height);
+    checkGLError("glViewport");
 }
 
 void Renderer::renderGrid(const Camera& camera)
