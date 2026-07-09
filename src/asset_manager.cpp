@@ -69,8 +69,7 @@ Shader loadBuiltinShader(const char* vert_name, const char* frag_name)
 {
     auto vert_fp = getSharedDataDirectory() / "shaders" / vert_name;
     auto frag_fp = getSharedDataDirectory() / "shaders" / frag_name;
-
-    return loadShader(vert_fp.string().c_str(), frag_fp.string().c_str());
+    return loadShader(vert_fp.c_str(), frag_fp.c_str());
 }
 
 } // namespace view3d
