@@ -10,5 +10,7 @@ set(ROOT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(SHARED_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/share)
 
+option(BUILD_CLI "Build command line interface" ON)
+
 add_subdirectory(third_party)
 add_subdirectory(src)

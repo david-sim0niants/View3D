@@ -1,9 +1,11 @@
-include(FetchContent)
+if (BUILD_CLI)
+    include(FetchContent)
 
-FetchContent_Declare(
-    CLI11
-    GIT_REPOSITORY https://github.com/CLIUtils/CLI11
-    GIT_TAG        main
-)
+    FetchContent_Declare(
+        CLI11
+        GIT_REPOSITORY https://github.com/CLIUtils/CLI11
+        GIT_TAG        main
+    )
 
-FetchContent_MakeAvailable(CLI11)
+    FetchContent_MakeAvailable(CLI11)
+endif ()
