@@ -15,9 +15,11 @@ add_library(${TARGET_NAME}
     asset_manager.cpp
     renderer.cpp
     controller.cpp
+    platform.cpp
 )
 
-target_include_directories(${TARGET_NAME} PUBLIC ${ROOT_INCLUDE_DIR})
+target_include_directories(${TARGET_NAME} INTERFACE ${ROOT_INCLUDE_DIR})
+target_include_directories(${TARGET_NAME} PRIVATE ${ROOT_INCLUDE_DIR}/view3d)
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}

@@ -3,13 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "asset_manager.hpp"
-#include "controller.hpp"
-#include "light.hpp"
-#include "mesh.hpp"
-#include "renderer.hpp"
-#include "resources.hpp"
-#include "scene.hpp"
+#include "view3d.hpp"
 
 namespace {
 

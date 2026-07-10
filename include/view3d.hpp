@@ -1,0 +1,15 @@
+#pragma once
+
+#include "view3d/asset_manager.hpp"
+#include "view3d/buffer.hpp"
+#include "view3d/camera.hpp"
+#include "view3d/controller.hpp"
+#include "view3d/light.hpp"
+#include "view3d/mesh.hpp"
+#include "view3d/object.hpp"
+#include "view3d/platform.hpp"
+#include "view3d/renderer.hpp"
+#include "view3d/resources.hpp"
+#include "view3d/scene.hpp"
+#include "view3d/shader.hpp"
+#include "view3d/transform.hpp"
