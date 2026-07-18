@@ -9,6 +9,13 @@ namespace view3d {
 template<typename T>
 class ResourcesOfType {
   public:
+    ResourcesOfType() = default;
+
+    ~ResourcesOfType()
+    {
+        clear();
+    }
+
     template<typename... Args>
     T* create(Args&&... args)
     {
@@ -22,6 +29,13 @@ class ResourcesOfType {
     {
         resources.erase(resource);
         allocator.delete_object(resource);
+    }
+
+    void clear()
+    {
+        for (T* resource : resources)
+            allocator.delete_object(resource);
+        resources.clear();
     }
 
   private:

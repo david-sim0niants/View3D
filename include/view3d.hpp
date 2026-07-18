@@ -13,3 +13,4 @@
 #include "view3d/scene.hpp"
 #include "view3d/shader.hpp"
 #include "view3d/transform.hpp"
+#include "view3d/view.hpp"

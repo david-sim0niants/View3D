@@ -16,6 +16,7 @@ add_library(${TARGET_NAME}
     renderer.cpp
     controller.cpp
     platform.cpp
+    view.cpp
 )
 
 target_include_directories(${TARGET_NAME} INTERFACE ${ROOT_INCLUDE_DIR})
